@@ -85,7 +85,7 @@ typedef struct fatent_s {
 
 //FUNCOES
 
-//MENU DE INICIALIZACAO
+//MENU DE INICIALIZACAO - Interface usuario
 int menu (){
 	string menu_opc[] = {"1 - Escrever Arquivo", "2 - Ler Arquivo", "3 - Apagar Arquivo", "4 - Mostrar Tabela FAT", "5 - Sair"};
 	int menu_i;
@@ -113,12 +113,14 @@ int menu (){
 				j=1;
 		}
 	}
-return menu_i;
+return menu_i + 1;
 }
 
 
+
+
 //ALOCA O DISCO RIGIDO
-void new_disk (){
+void make_disk (){
 	int i, j;
 	cout << "Quantos cilindros o disco deve ter?\nAtencao! cada cilindro ocupa 150kB de espaco real nesta maquina!!" << endl;
 	i = 0;
@@ -148,21 +150,82 @@ void free_disk (){
 
 
 
+//ESCREVE ARQUIVO
+void escreve_arq (){
+/*
+acha CLUSTER livre - seguir ordem sugerida no roteiro. (implementar conversor registro x cluster primeiro (tamanho 4))
+gravar clusters consecutivos em mesmas posicoes do mesmo cilindro em trilhas diferentes (implementar funcao pra achar proximo)
+atualiza tabela FAT
+calcular tempo gasto (seek medio no primeiro cilindro)
+*/
+}
+
+//LE ARQUIVO
+void le_arq (){
+/*Procurar nome do arquivo no HD virtual e gravar um arquivo "copia" no HD real com nome SAIDA.TXT*/
+}
+
+//APAGA ARQUIVO
+void apaga_arq (){
+/*varre a tabela FAT definindo o campo "used" como 0 nos registros correspondentes ao arquivo*/
+}
+
+//TABELA FAT
+void tabelaFAT (){
+/*mostra a tabela*/
+}
+
+
+
+
+
+
+
 int main()
 {
 //VARIAVEIS
-	int menu_i;
+	int menu_input, running;
 
 
 
 //CORPO DO PROGRAMA
-
-menu_i = menu();	//imprime o menu inicial na tela e define qual opcao o usuario quer
-new_disk();
-free_disk();
+make_disk();
 
 
+running = 1;
+while (running == 1){
+	menu_input = menu();
+	switch (menu_input){
+		case 1:			//ESCREVE ARQUIVO
+			escreve_arq();
+			running = 1;
+			break;
+		case 2:			//LE ARQUIVO
+			le_arq();
+			running = 1;
+			break;
+		case 3:			//APAGA ARQUIVO
+			apaga_arq();
+			running = 1;
+			break;
+		case 4:			//TABELA FAT
+			tabelaFAT();
+			running = 1;
+			break;
+		case 5:			//SAIR
+			cout << "Ate logo!" << endl;
+			running = 0;
+			break;
+		default:
+			running = 0;
+			break;
+	}
 
+}
+
+
+
+free_disk();	//INDISPENSAVEL!!!!!
 	return 0;
 }
 
