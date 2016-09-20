@@ -68,15 +68,17 @@ int n_cyl;
 
 	//Tabela FAT
 typedef struct fatlist_s {
-	char file_name[100];
-	unsigned int first_sector;
+	char file_name[100];		//nome do arquivo
+	unsigned int first_sector;	//numero do primeiro setor
 } fatlist;
 
 typedef struct fatent_s {
-	unsigned int used;
-	unsigned int eof;
-	unsigned int next;
+	unsigned int used;	//flag
+	unsigned int eof;	//flag
+	unsigned int next;	//numero do setor correspondente
 } fatent;
+
+fatent *fat_table;
 
 
 
@@ -88,8 +90,8 @@ typedef struct fatent_s {
 //MENU DE INICIALIZACAO - Interface usuario
 int menu (){
 	string menu_opc[] = {"1 - Escrever Arquivo", "2 - Ler Arquivo", "3 - Apagar Arquivo", "4 - Mostrar Tabela FAT", "5 - Sair"};
-	int menu_i;
-	int i, j;
+	unsigned int menu_i;
+	unsigned int i, j;
 	j=1;
 	while (j==1){			//Loop ate que o valor de entrada seja valido (nao forcar demais, as vezes buga)
 		cout << endl;
@@ -117,12 +119,30 @@ return menu_i + 1;
 }
 
 
+//TABELA FAT
+void make_FAT (){
+	int size, i;
+	size = (300 * n_cyl) - 1;
+	fat_table = new fatent[size];
+	for (i = 0; i <= size; i++){
+		fat_table[i].used = 0;
+		fat_table[i].eof = 1;
+		fat_table[i].next = 0;
+	}
+}
+void free_FAT (){
+	delete[] fat_table;
+	cout << "FAT desmontada. ";
+}
+
+
+
 
 
 //ALOCA O DISCO RIGIDO
 void make_disk (){
-	int i, j;
-	cout << "Quantos cilindros o disco deve ter?\nAtencao! cada cilindro ocupa 150kB de espaco real nesta maquina!!" << endl;
+	unsigned int i, j;
+	cout << "Quantos cilindros o disco deve ter?" << endl;
 	i = 0;
 	while (i==0){
 		cin >> n_cyl;
@@ -132,6 +152,7 @@ void make_disk (){
 			n_cyl = n_cyl - 1;
 			cylinder = new track_array[n_cyl];	//"n_cyl" definido como 10 pelo roteiro
 			i = 1;
+			n_cyl = n_cyl + 1;
 		}
 		else{
 			cout << endl << "Por favor, escolha um valor menor que 30." << endl;
@@ -150,12 +171,8 @@ void free_disk (){
 
 
 
-<<<<<<< HEAD
 //ESCREVE ARQUIVO
 void escreve_arq (){
-=======
-
->>>>>>> master
 /*
 acha CLUSTER livre - seguir ordem sugerida no roteiro. (implementar conversor registro x cluster primeiro (tamanho 4))
 gravar clusters consecutivos em mesmas posicoes do mesmo cilindro em trilhas diferentes (implementar funcao pra achar proximo)
@@ -175,7 +192,7 @@ void apaga_arq (){
 }
 
 //TABELA FAT
-void tabelaFAT (){
+void show_FAT (){
 /*mostra a tabela*/
 }
 
@@ -193,7 +210,7 @@ int main()
 
 
 //CORPO DO PROGRAMA
-make_disk();
+make_disk(); make_FAT();
 
 
 running = 1;
@@ -213,7 +230,7 @@ while (running == 1){
 			running = 1;
 			break;
 		case 4:			//TABELA FAT
-			tabelaFAT();
+			show_FAT();
 			running = 1;
 			break;
 		case 5:			//SAIR
@@ -229,7 +246,7 @@ while (running == 1){
 
 
 
-free_disk();	//INDISPENSAVEL!!!!!
+free_FAT(); free_disk();	//INDISPENSAVEL!!!!!
 	return 0;
 }
 
