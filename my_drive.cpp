@@ -179,6 +179,9 @@ gravar clusters consecutivos em mesmas posicoes do mesmo cilindro em trilhas dif
 atualiza tabela FAT
 calcular tempo gasto (seek medio no primeiro cilindro)
 */
+int cluster;
+	cluster = first_free ();
+
 }
 
 //LE ARQUIVO
@@ -197,6 +200,17 @@ void show_FAT (){
 }
 
 
+
+
+//SUB-FUNCOES
+int first_free(){
+	int sector;
+	sector = 0; /*apagar*/
+
+/*Esta funcao deve encontrar o primeiro setor livre, percorrendo a tabela FAT de acordo com o algoritmo indicado no roteiro*/
+
+	return sector;
+}
 
 
 
