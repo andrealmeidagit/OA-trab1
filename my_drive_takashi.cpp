@@ -7,7 +7,7 @@
 //
 //AUTORES:
 //	ANDRE ABREU RODRIGUES DE ALMEIDA - 12/0007100 - andre.almeida3@gmail.com
-//	BRUNO TAKASHI TENGAN			 - 12/XXXXXXX - xxxxxxx@gmail.com
+//	BRUNO TAKASHI TENGAN			 - 12/0167263 - bt.tengan@gmail.com
 //
 //RESUMO: O PROGRAMA A SEGUIR SIMULA EM LINGUAGEM C++ O FUNCIONAMENTO DE UM DISCO RIGIDO.
 //		  OS PONTOS DE DESTAQUE DESTE PROJETO SAO:
@@ -38,9 +38,11 @@
 
 
 
-//#include<stdio.h>
+#include<stdio.h>
 #include<iostream>
 #include<string>
+#include<fcntl.h>
+#include<fstream>
 
 using namespace std;
 
@@ -79,9 +81,6 @@ typedef struct fatent_s {
 } fatent;
 
 fatent *fat_table;
-
-
-
 
 
 
@@ -179,14 +178,62 @@ gravar clusters consecutivos em mesmas posicoes do mesmo cilindro em trilhas dif
 atualiza tabela FAT
 calcular tempo gasto (seek medio no primeiro cilindro)
 */
-int cluster;
-	cluster = first_free ();
-
 }
 
 //LE ARQUIVO
 void le_arq (){
 /*Procurar nome do arquivo no HD virtual e gravar um arquivo "copia" no HD real com nome SAIDA.TXT*/
+
+	char find_name[100];
+	int flag, count, cyl, tra, sec;
+	fstream file;
+
+	cout << "Entre com o nome do arquivo que quer buscar." << endl << "Nome: ";
+	cin >> find_name;										// Pega nome do arquivo.
+
+	flag = 0;
+	count = 0;
+	do {													// Avalia validade do arquivo.
+		if (listafat[count].file_name == find_name){
+			flag = 1;
+		}
+		else {
+			count++;
+		}
+	} while ((flag == 0) && (count < 1000));
+
+	if (flag == 0){											// Caso invalido.
+		cout << "Arquivo invalido!" << endl;
+	}
+	else {													// Caso valido.
+		file.open ("SAIDA.TXT", ios::in | ios::out | ios::trunc);	// Deleta saida antiga e faz o novo.
+
+		count = listafat[count].first_sector;						// Busca setor inicial.
+		while (fat_table[count].eof == 0){							// Checa se cluster final.
+			cyl = count/300;										// Identifica cilindro.
+			tra = (count%300)/60;									// Identifica trilha do cilindro.
+
+			file << cylinder[cyl].track[tra].sector[count];			// Escreve cluster na saida.
+			file << cylinder[cyl].track[tra].sector[count+1];
+			file << cylinder[cyl].track[tra].sector[count+2];
+			file << cylinder[cyl].track[tra].sector[count+3];
+
+			count = listafat[count+3].next;							// Pega proximo cluster.
+		}
+
+		cyl = count/300;
+		tra = (count%300)/60;
+		flag = 0;
+		sec = count;
+		do {														// Ultimo cluster.
+			file << cylinder[cyl].track[tra].sector[sec];
+			sec++;
+		} while (flag == (fat_table[count].eof - 1));
+
+		cout << "Operação finalizada com sucesso." << endl;
+
+		file.close();												// Fecha saida.txt.
+	}
 }
 
 //APAGA ARQUIVO
@@ -202,17 +249,6 @@ void show_FAT (){
 
 
 
-//SUB-FUNCOES
-int first_free(){
-	int sector;
-	sector = 0; /*apagar*/
-
-/*Esta funcao deve encontrar o primeiro setor livre, percorrendo a tabela FAT de acordo com o algoritmo indicado no roteiro*/
-
-	return sector;
-}
-
-
 
 
 
@@ -224,43 +260,44 @@ int main()
 
 
 //CORPO DO PROGRAMA
-make_disk(); make_FAT();
+	make_disk(); 
+	make_FAT();
 
 
-running = 1;
-while (running == 1){
-	menu_input = menu();
-	switch (menu_input){
-		case 1:			//ESCREVE ARQUIVO
-			escreve_arq();
-			running = 1;
-			break;
-		case 2:			//LE ARQUIVO
-			le_arq();
-			running = 1;
-			break;
-		case 3:			//APAGA ARQUIVO
-			apaga_arq();
-			running = 1;
-			break;
-		case 4:			//TABELA FAT
-			show_FAT();
-			running = 1;
-			break;
-		case 5:			//SAIR
-			cout << "Ate logo!" << endl;
-			running = 0;
-			break;
-		default:
-			running = 0;
-			break;
+	running = 1;
+	while (running == 1){
+		menu_input = menu();
+		switch (menu_input){
+			case 1:			//ESCREVE ARQUIVO
+				escreve_arq();
+				running = 1;
+				break;
+			case 2:			//LE ARQUIVO
+				le_arq();
+				running = 1;
+				break;
+			case 3:			//APAGA ARQUIVO
+				apaga_arq();
+				running = 1;
+				break;
+			case 4:			//TABELA FAT
+				show_FAT();
+				running = 1;
+				break;
+			case 5:			//SAIR
+				cout << "Ate logo!" << endl;
+				running = 0;
+				break;
+			default:
+				running = 0;
+				break;
+		}
 	}
 
-}
 
 
-
-free_FAT(); free_disk();	//INDISPENSAVEL!!!!!
+	free_FAT(); 
+	free_disk();	//INDISPENSAVEL!!!!!
 	return 0;
 }
 
